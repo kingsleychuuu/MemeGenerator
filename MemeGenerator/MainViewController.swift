@@ -14,7 +14,6 @@ class MainViewController: UIViewController, UINavigationControllerDelegate {
     let controlPanelView = UIView()
     let textView = UITextView()
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupBackground()
@@ -48,10 +47,11 @@ class MainViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     fileprivate func setupDragRecognizer() {
+        
         let gesture = UIPanGestureRecognizer(target: self, action: #selector(userDragged(gesture:)))
         textView.addGestureRecognizer(gesture)
         textView.isUserInteractionEnabled = true
-        textView.backgroundColor = .red
+        textView.backgroundColor = .clear
         textView.text = "testing"
         textView.translatesAutoresizingMaskIntoConstraints = true
         textView.delegate = self
@@ -64,10 +64,14 @@ class MainViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     @objc func userDragged(gesture: UIPanGestureRecognizer){
-        let location = gesture.location(in: self.view)
-        textView.center = location
+        let translation = gesture.translation(in: view)
+        guard let gestureView = gesture.view else { return }
+        gestureView.center = CGPoint(
+            x: gestureView.center.x + translation.x,
+            y: gestureView.center.y + translation.y
+        )
+        gesture.setTranslation(.zero, in: view)
     }
-    
     
     @objc func addButtonTapped() {
         let ac = UIAlertController(title: "Select Image Source", message: nil, preferredStyle: .actionSheet)
@@ -79,7 +83,11 @@ class MainViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     @objc func saveButtonTapped() {
-        
+        let ac = UIAlertController(title: "Save Photo?", message: nil, preferredStyle: .actionSheet)
+        ac.addAction(UIAlertAction(title: "Save", style: .default, handler: savePhoto))
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        ac.popoverPresentationController?.barButtonItem = self.navigationItem.rightBarButtonItem
+        present(ac, animated: true)
     }
     
     func openPage(action: UIAlertAction) {
@@ -88,6 +96,10 @@ class MainViewController: UIViewController, UINavigationControllerDelegate {
         pickerViewController.allowsEditing = true
         pickerViewController.delegate = self
         present(pickerViewController, animated: true, completion: nil)
+    }
+    
+    func savePhoto(action: UIAlertAction) {
+        
     }
 }
 
